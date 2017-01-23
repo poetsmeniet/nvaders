@@ -1,4 +1,5 @@
 #include <ncurses.h>
+#include <string.h>
 #include <unistd.h>
 
 #define DELAY1 10000
@@ -12,6 +13,7 @@ struct f{
 struct e{
     int x;
     int y;
+    char body[20];
 };
 
 void setStage(struct f *ship, struct e *enemy, int max_x, int max_y);
@@ -27,7 +29,7 @@ int main(int argc, char *argv[]) {
     timeout(0); /* set delay non blocking */
 
     int max_y = 0; int max_x = 0;
-    int mv, d;
+    int mv;int d = 0;
 
     struct f ship;
     ship.x=0;
@@ -36,6 +38,7 @@ int main(int argc, char *argv[]) {
     struct e enemy;
     enemy.x=0;
     enemy.y=0;
+    strcpy(enemy.body,"##########");
    
     // Global var `stdscr` is created by the call to `initscr()`
     getmaxyx(stdscr, max_y, max_x);
@@ -47,10 +50,14 @@ int main(int argc, char *argv[]) {
 
         moveShip(&ship, mv, max_x, max_y);
 
-        if(enemy.x == (max_x - 10))
-            d=1;
-        if(enemy.x == 0)
-            d=0;
+       if(enemy.x == (max_x - 10)){
+           d=1;
+           enemy.y++;
+       }
+       if(enemy.x == 0){
+           enemy.y++;
+           d=0;
+       }
         moveEnemy(&enemy, max_x, max_y, d);
 
         printObjects(&ship, &enemy, max_x, max_y);
@@ -76,11 +83,12 @@ void moveEnemy(struct e *enemy, int max_x, int max_y, int d){
         enemy->x--;
     else
         enemy->x++;
+    //sprintf(enemy->body,"*****(%d)",d);
 }
 
 void printObjects(struct f * ship, struct e *enemy, int max_x, int max_y){
     clear();
-    mvprintw(enemy->y, enemy->x, "0000000000");
+    mvprintw(enemy->y, enemy->x, enemy->body);
     
     mvprintw(max_y-4, ship->x, "    | ");
     mvprintw(max_y-3, ship->x, "   (0) ");
