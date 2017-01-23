@@ -81,7 +81,11 @@ void moveEnemy(struct e *enemy, int max_x, int max_y, int d){
 void printObjects(struct f * ship, struct e *enemy, int max_x, int max_y){
     clear();
     mvprintw(enemy->y, enemy->x, "0000000000");
-    mvprintw(max_y-1, ship->x, "[{O}]");
+    
+    mvprintw(max_y-4, ship->x, "    | ");
+    mvprintw(max_y-3, ship->x, "   (0) ");
+    mvprintw(max_y-2, ship->x, "_/[{X}]\\_");
+    mvprintw(max_y-1, ship->x, "   ^ ^   ");
     refresh();
 }
 
