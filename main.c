@@ -16,7 +16,7 @@ struct e{
 
 void setStage(struct f *ship, struct e *enemy, int max_x, int max_y);
 void printObjects(struct f * ship, struct e *enemy, int max_x, int max_y);
-void moveShip(struct f *ship, int mv);
+void moveShip(struct f *ship, int mv, int max_x, int max_y);
 void moveEnemy(struct e *enemy, int max_x, int max_y, int d);
 
 int main(int argc, char *argv[]) {
@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) {
     while(1) {
         mv=getch();
 
-        moveShip(&ship, mv);
+        moveShip(&ship, mv, max_x, max_y);
 
         if(enemy.x == (max_x - 10))
             d=1;
@@ -61,11 +61,11 @@ int main(int argc, char *argv[]) {
     endwin();
 }
 
-void moveShip(struct f *ship, int mv){
-        if(mv == KEY_LEFT){
-            ship->x--;
-        }else if(mv == KEY_RIGHT){
-            ship->x++;
+void moveShip(struct f *ship, int mv, int max_x, int max_y){
+        if(mv == KEY_LEFT & ship->x > 1){
+            ship->x-=2;
+        }else if(mv == KEY_RIGHT & ship->x < max_x - 9){
+            ship->x+=2;
         }else{
             //ship.x=x;
         }
