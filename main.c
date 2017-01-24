@@ -1,7 +1,6 @@
 #include <ncurses.h>
 #include <string.h>
 #include <unistd.h>
-
 #define DELAY1 10000
 #define DELAY2 30000
 #define MVSTEP 0.1
@@ -13,6 +12,7 @@ struct f{
 struct e{
     int x;
     int y;
+    int hits;
     char body[20];
 };
 struct pulses{
@@ -27,34 +27,19 @@ void setStage(struct f *ship, struct e *enemy, struct pulses *p, int max_x, int 
 void printObjects(struct f * ship, struct e *enemy, struct pulses *pulse, int max_x, int max_y);
 void moveShip(struct f *ship, struct pulses *pulse, int mv, int max_x, int max_y);
 void moveEnemy(struct e *enemy, int max_x, int max_y, int d);
-
-void shoot(struct pulses *pulse){
-    pulse->used=0;
-}
-
-void moveProjectiles(struct pulses *pulse, int ship_x, int max_y){
-    if(pulse[0].used == 0){
-        pulse[0].x=ship_x + 4;
-        pulse[0].y=pulse[0].y -= pulse[0].speed;
-
-        if(pulse[0].y <= 0){
-            pulse[0].used=1;
-            pulse[0].y=max_y;
-        }
-    }
-}
+void shoot(struct pulses *pulse);
+void moveProjectiles(struct pulses *pulse, int ship_x, int max_y);
 
 int main(int argc, char *argv[]) {
     initscr();
     noecho();
     keypad(stdscr, TRUE);
     curs_set(FALSE);
-    timeout(0); /* set delay non blocking */
+    timeout(0); 
 
     int max_y = 0; int max_x = 0;
     int mv;int d = 0;
 
-    // Global var `stdscr` is created by the call to `initscr()`
     getmaxyx(stdscr, max_y, max_x);
 
     struct f ship;
@@ -64,7 +49,8 @@ int main(int argc, char *argv[]) {
     struct e enemy;
     enemy.x=0;
     enemy.y=0;
-    strcpy(enemy.body,"##########");
+    enemy.hits=0;
+    snprintf(enemy.body, sizeof enemy.body,"_______(%i)_______",0);
 
     struct pulses pulse[5];
     pulse[0].x=0;
@@ -77,12 +63,14 @@ int main(int argc, char *argv[]) {
     setStage(&ship, &enemy, pulseP, max_x, max_y);//move to on winch
    
     while(1) {
+        getmaxyx(stdscr, max_y, max_x);
         mv=getch();
 
         moveShip(&ship, pulseP, mv, max_x, max_y);
+
         moveProjectiles(pulseP, ship.x, max_y);
 
-        if(enemy.x == (max_x - 10)){
+        if(enemy.x == (max_x - 18)){
             d=1;
             enemy.y++;
         }
@@ -90,6 +78,7 @@ int main(int argc, char *argv[]) {
             enemy.y++;
             d=0;
         }
+
         moveEnemy(&enemy, max_x, max_y, d);
 
         printObjects(&ship, &enemy, pulseP, max_x, max_y);
@@ -101,9 +90,9 @@ int main(int argc, char *argv[]) {
 }
 
 void moveShip(struct f *ship, struct pulses *pulse, int mv, int max_x, int max_y){
-        if(mv == KEY_LEFT & ship->x > 4){
+        if(mv == KEY_LEFT && ship->x > 4){
             ship->x-=4;
-        }else if(mv == KEY_RIGHT & ship->x < max_x - 14){
+        }else if(mv == KEY_RIGHT && ship->x < max_x - 14){
             ship->x+=4;
         }else if(mv == ' '){
             shoot(pulse);
@@ -131,17 +120,28 @@ void printObjects(struct f * ship, struct e *enemy, struct pulses *pulse, int ma
 
     mvprintw(pulse->y, pulse->x, pulse->body);
 
-    //collisions?
-    if(pulse->y == enemy->y && \
-       pulse->x > enemy->x && \
-       pulse->x <= (enemy->x + 10))
+    // hits
+    if(pulse->y <= enemy->y && \
+       pulse->x >= (enemy->x - 5) && \
+       pulse->x <= (enemy->x + 20))
     
     {
-        strcpy(enemy->body, "OUCHOUCH!!");
+        enemy->hits++;
+        //snprintf(enemy->body,"_______(%i)_______",enemy->hits);
+        snprintf(enemy->body, sizeof enemy->body,"_______(%i)_______",enemy->hits);
         pulse->used=1;
         pulse->y=max_y;
         pulse->x=max_x;
     }
+
+    //detect game over, enemy collides with ship
+    if(enemy->y == max_y - 4 && enemy->x >= ship->x - 8 && enemy->x <= ship->x + 8){
+        snprintf(enemy->body, sizeof enemy->body,"GAME OVER. %i hits",enemy->hits);
+        mvprintw(enemy->y, enemy->x, enemy->body);
+        refresh();
+        sleep(60);
+    }
+            
     
     refresh();
 }
@@ -160,5 +160,21 @@ void setStage(struct f *ship, struct e *enemy, struct pulses *p, int max_x, int 
         printObjects(ship, enemy, p, max_x, max_y);
 
         usleep(DELAY1);
+    }
+}
+
+void shoot(struct pulses *pulse){
+    pulse[0].used=0;
+}
+
+void moveProjectiles(struct pulses *pulse, int ship_x, int max_y){
+    if(pulse[0].used == 0){
+        pulse[0].x=ship_x + 4;
+        pulse[0].y=pulse[0].y -= pulse[0].speed;
+
+        if(pulse[0].y <= 0){
+            pulse[0].used=1;
+            pulse[0].y=max_y;
+        }
     }
 }
