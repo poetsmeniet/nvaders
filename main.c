@@ -13,13 +13,13 @@ struct e{
     int x;
     int y;
     int hits;
-    char body[20];
+    char body[35];
 };
 struct pulses{
     int x;
     int y;
     int speed;
-    char body[1];
+    char body[4];
     int used;
 };
 
@@ -28,7 +28,7 @@ void printObjects(struct f * ship, struct e *enemy, struct pulses *pulse, int ma
 void moveShip(struct f *ship, struct pulses *pulse, int mv, int max_x, int max_y);
 void moveEnemy(struct e *enemy, int max_x, int max_y, int d);
 void shoot(struct pulses *pulse);
-void moveProjectiles(struct pulses *pulse, int ship_x, int max_y);
+void moveProjectiles(struct pulses *pulse, int ship_x, int ship_y, int maxy_y);
 
 int main(int argc, char *argv[]) {
     initscr();
@@ -55,9 +55,9 @@ int main(int argc, char *argv[]) {
     struct pulses pulse[5];
     pulse[0].x=0;
     pulse[0].y=max_y;
-    pulse[0].speed=2;
+    pulse[0].speed=1;
     pulse[0].used=1;
-    strcpy(pulse[0].body,"*");
+    strcpy(pulse[0].body,"|||");
     struct pulses *pulseP=pulse;
    
     setStage(&ship, &enemy, pulseP, max_x, max_y);//move to on winch
@@ -68,7 +68,7 @@ int main(int argc, char *argv[]) {
 
         moveShip(&ship, pulseP, mv, max_x, max_y);
 
-        moveProjectiles(pulseP, ship.x, max_y);
+        moveProjectiles(pulseP, ship.x, ship.y, max_y);
 
         if(enemy.x == (max_x - 18)){
             d=1;
@@ -94,11 +94,16 @@ void moveShip(struct f *ship, struct pulses *pulse, int mv, int max_x, int max_y
             ship->x-=4;
         }else if(mv == KEY_RIGHT && ship->x < max_x - 14){
             ship->x+=4;
-        }else if(mv == ' '){
-            shoot(pulse);
-        }else{
-            //ship.x=x;
         }
+        if(mv == KEY_UP){
+            ship->y-=4;
+        }else if(mv == KEY_DOWN){
+            ship->y+=4;
+        }
+        if(mv == ' ')
+            shoot(pulse);
+        if(mv == 'p')
+            ship->y+=4;
 }
 
 void moveEnemy(struct e *enemy, int max_x, int max_y, int d){
@@ -113,25 +118,24 @@ void printObjects(struct f * ship, struct e *enemy, struct pulses *pulse, int ma
     clear();
     mvprintw(enemy->y, enemy->x, enemy->body);
     
-    mvprintw(max_y-4, ship->x, "    | ");
-    mvprintw(max_y-3, ship->x, "   (0) ");
-    mvprintw(max_y-2, ship->x, "_/[{X}]\\_");
-    mvprintw(max_y-1, ship->x, "   ^ ^   ");
+    mvprintw(max_y-4+ship->y, ship->x, "    | ");
+    mvprintw(max_y-3+ship->y, ship->x, "   (0) ");
+    mvprintw(max_y-2+ship->y, ship->x, "_/[{X}]\\_");
+    mvprintw(max_y-1+ship->y, ship->x, "   ^ ^   ");
 
     mvprintw(pulse->y, pulse->x, pulse->body);
 
     // hits
     if(pulse->y <= enemy->y && \
-       pulse->x >= (enemy->x - 5) && \
-       pulse->x <= (enemy->x + 20))
+       pulse->x >= (enemy->x - 8) && \
+       pulse->x <= (enemy->x + 8))
     
     {
         enemy->hits++;
-        //snprintf(enemy->body,"_______(%i)_______",enemy->hits);
-        snprintf(enemy->body, sizeof enemy->body,"_______(%i)_______",enemy->hits);
+        snprintf(enemy->body, sizeof enemy->body,"_______(%i)%d______",enemy->hits,ship->y);
         pulse->used=1;
-        pulse->y=max_y;
-        pulse->x=max_x;
+        pulse->y=ship->y;
+        pulse->x=ship->x;
     }
 
     //detect game over, enemy collides with ship
@@ -167,14 +171,19 @@ void shoot(struct pulses *pulse){
     pulse[0].used=0;
 }
 
-void moveProjectiles(struct pulses *pulse, int ship_x, int max_y){
+void moveProjectiles(struct pulses *pulse, int ship_x, int ship_y, int max_y){
+    //pulse[0].y=20;
     if(pulse[0].used == 0){
-        pulse[0].x=ship_x + 4;
+        pulse[0].x=ship_x + 3;
         pulse[0].y=pulse[0].y -= pulse[0].speed;
 
         if(pulse[0].y <= 0){
             pulse[0].used=1;
-            pulse[0].y=max_y;
+            pulse[0].y=max_y + ship_y;
+            //snprintf(pulse[0].body, sizeof pulse[0].body, "%i",ship_y);
         }
+    }else{
+        pulse[0].x=ship_x + 3;
+        pulse[0].y=max_y + ship_y;
     }
 }
