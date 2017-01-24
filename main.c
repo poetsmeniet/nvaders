@@ -132,10 +132,16 @@ void printObjects(struct f * ship, struct e *enemy, struct pulses *pulse, int ma
     mvprintw(pulse->y, pulse->x, pulse->body);
 
     //collisions?
-    if(pulse->y == enemy->y && pulse->x > enemy->x && pulse->x <= (enemy->x + 10))
-            strcpy(enemy->body, "OUCHOUCH!!");
-
-   
+    if(pulse->y == enemy->y && \
+       pulse->x > enemy->x && \
+       pulse->x <= (enemy->x + 10))
+    
+    {
+        strcpy(enemy->body, "OUCHOUCH!!");
+        pulse->used=1;
+        pulse->y=max_y;
+        pulse->x=max_x;
+    }
     
     refresh();
 }
