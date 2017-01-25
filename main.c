@@ -28,7 +28,7 @@ void printObjects(struct f * ship, struct e *enemy, struct p *pulse, int max_x, 
 void moveShip(struct f *ship, struct p *pulse, int mv, int max_x, int max_y);
 void moveEnemy(struct e *enemy, int max_x, int max_y, int d);
 void shoot(struct p *pulse);
-void moveProjectiles(struct p *pulse, int ship_x, int ship_y, int maxy_y);
+void moveProjectiles(struct p *pulse, struct e *enemy, int ship_x, int ship_y, int maxy_y);
 
 int main(int argc, char *argv[]) {
     initscr();
@@ -69,7 +69,7 @@ int main(int argc, char *argv[]) {
 
         moveShip(&ship, pulseP, mv, max_x, max_y);
 
-        moveProjectiles(pulseP, ship.x, ship.y, max_y);
+        moveProjectiles(pulseP, &enemy, ship.x, ship.y, max_y);
 
         if(enemy.x == (max_x - 18)){
             d=1;
@@ -128,14 +128,13 @@ void printObjects(struct f * ship, struct e *enemy, struct p *pulse, int max_x, 
     int i;
     for(i=0;pulse[i].x!=-1;i++){
         mvprintw(pulse[i].y, pulse[i].x, pulse[i].body);
-        // hits
+        // enemy hits
         if(pulse[i].y <= enemy->y && \
-           pulse[i].x >= (enemy->x - 8) && \
-           pulse[i].x <= (enemy->x + 8))
-        
+        pulse[i].x >= (enemy->x - 8) && \
+        pulse[i].x <= (enemy->x + 8))
         {
             enemy->hits++;
-            snprintf(enemy->body, sizeof enemy->body,"_______(%i)%d______",enemy->hits,ship->y);
+            snprintf(enemy->body, sizeof enemy->body,"_______(%i)______",enemy->hits);
             pulse[i].used=1;
             pulse[i].y=ship->y;
             pulse[i].x=ship->x;
@@ -182,7 +181,7 @@ void shoot(struct p *pulse){
     }
 }
 
-void moveProjectiles(struct p *pulse, int ship_x, int ship_y, int max_y){
+void moveProjectiles(struct p *pulse, struct e *enemy, int ship_x, int ship_y, int max_y){
     int i;
     for(i=0;pulse[i].x!=-1;i++){
         if(pulse[i].used == 0){ //in use
@@ -192,6 +191,8 @@ void moveProjectiles(struct p *pulse, int ship_x, int ship_y, int max_y){
             if(pulse[i].y <= 1){ //hit stage
                 pulse[i].used=1;
                 pulse[i].y=max_y + ship_y;
+                enemy->hits--;
+                snprintf(enemy->body, sizeof enemy->body,"_______(%i)______",enemy->hits);
             }
         }else{
             pulse[i].x=ship_x + 3;
