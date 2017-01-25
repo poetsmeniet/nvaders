@@ -1,4 +1,3 @@
-- initialize array struct during declaration
 - function for loading ammo
 - lose points on miss target
 - fix collision with enemy
