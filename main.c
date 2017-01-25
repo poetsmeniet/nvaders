@@ -52,22 +52,13 @@ int main(int argc, char *argv[]) {
     enemy.hits=0;
     snprintf(enemy.body, sizeof enemy.body,"_______(%i)_______",0);
 
-    struct p pulse[5];
-    pulse[0].x=0;
-    pulse[0].y=max_y;
-    pulse[0].speed=1;
-    pulse[0].used=1;
-    strcpy(pulse[0].body,"|||");
+    struct p pulse2[]={
+        {.x=0, .y=max_y, .speed=1, .used=1, .body="|||"},
+        {.x=0, .y=max_y, .speed=1, .used=1, .body="|^|"},
+        {.x=-1}
+    };
 
-    pulse[1].x=0;
-    pulse[1].y=max_y;
-    pulse[1].speed=1;
-    pulse[1].used=1;
-    strcpy(pulse[1].body,"|^|");
-    
-    pulse[2].x=-1;
-
-    struct p *pulseP=pulse;
+    struct p *pulseP=pulse2;
    
     setStage(&ship, &enemy, pulseP, max_x, max_y);//move to on winch
    
