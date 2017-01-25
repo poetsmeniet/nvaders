@@ -43,16 +43,9 @@ int main(int argc, char *argv[]) {
 
     getmaxyx(stdscr, max_y, max_x);
 
-    struct f ship;
-    ship.x=0;
-    ship.y=0;
-
-    struct e enemy;
-    enemy.x=0;
-    enemy.y=0;
-    enemy.hits=0;
-    snprintf(enemy.body, sizeof enemy.body,"_______(%i)_______",0);
-
+    //initialize structs, game objects
+    struct f ship = {0, 0};
+    struct e enemy = {0, 0, 0, "_______(0)_______"};
     struct p pulses[]={
         {.x=0, .y=max_y, .speed=1, .used=1, .dmg=1, .body=" | "},
         {.x=0, .y=max_y, .speed=1, .used=1, .dmg=2, .body="|||"},
@@ -143,7 +136,6 @@ void printObjects(struct f * ship, struct e *enemy, struct p *pulse, int max_x, 
     }
 
     //detect game over, enemy collides with ship
-    //if(enemy->y == max_y - 4 && enemy->x >= ship->x - 8 && enemy->x <= ship->x + 8){
     if(enemy->y == max_y - 4 && enemy->x >= ship->x - 8 && enemy->x <= ship->x + 8){
         snprintf(enemy->body, sizeof enemy->body,"GAME OVER. %i hits",enemy->hits);
         mvprintw(enemy->y, enemy->x, enemy->body);
@@ -151,7 +143,6 @@ void printObjects(struct f * ship, struct e *enemy, struct p *pulse, int max_x, 
         sleep(60);
     }
             
-    
     refresh();
 }
 
