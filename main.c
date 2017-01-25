@@ -58,6 +58,15 @@ int main(int argc, char *argv[]) {
     pulse[0].speed=1;
     pulse[0].used=1;
     strcpy(pulse[0].body,"|||");
+
+    pulse[1].x=0;
+    pulse[1].y=max_y;
+    pulse[1].speed=1;
+    pulse[1].used=1;
+    strcpy(pulse[1].body,"|^|");
+    
+    pulse[2].x=-1;
+
     struct p *pulseP=pulse;
    
     setStage(&ship, &enemy, pulseP, max_x, max_y);//move to on winch
@@ -123,19 +132,22 @@ void printObjects(struct f * ship, struct e *enemy, struct p *pulse, int max_x, 
     mvprintw(max_y-2+ship->y, ship->x, "_/[{X}]\\_");
     mvprintw(max_y-1+ship->y, ship->x, "   ^ ^   ");
 
-    mvprintw(pulse->y, pulse->x, pulse->body);
 
-    // hits
-    if(pulse->y <= enemy->y && \
-       pulse->x >= (enemy->x - 8) && \
-       pulse->x <= (enemy->x + 8))
-    
-    {
-        enemy->hits++;
-        snprintf(enemy->body, sizeof enemy->body,"_______(%i)%d______",enemy->hits,ship->y);
-        pulse->used=1;
-        pulse->y=ship->y;
-        pulse->x=ship->x;
+    int i;
+    for(i=0;pulse[i].x!=-1;i++){
+        mvprintw(pulse[i].y, pulse[i].x, pulse[i].body);
+        // hits
+        if(pulse[i].y <= enemy->y && \
+           pulse[i].x >= (enemy->x - 8) && \
+           pulse[i].x <= (enemy->x + 8))
+        
+        {
+            enemy->hits++;
+            snprintf(enemy->body, sizeof enemy->body,"_______(%i)%d______",enemy->hits,ship->y);
+            pulse[i].used=1;
+            pulse[i].y=ship->y;
+            pulse[i].x=ship->x;
+        }
     }
 
     //detect game over, enemy collides with ship
@@ -169,22 +181,29 @@ void setStage(struct f *ship, struct e *enemy, struct p *p, int max_x, int max_y
 }
 
 void shoot(struct p *pulse){
-    pulse[0].used=0;
+    int i;
+    for(i=0;pulse[i].x!=-1;i++){
+        if(pulse[i].used==1){ // is available
+            pulse[i].used=0; //shoot
+            break;
+        }
+    }
 }
 
 void moveProjectiles(struct p *pulse, int ship_x, int ship_y, int max_y){
-    //pulse[0].y=20;
-    if(pulse[0].used == 0){
-        pulse[0].x=ship_x + 3;
-        pulse[0].y=pulse[0].y -= pulse[0].speed;
+    int i;
+    for(i=0;pulse[i].x!=-1;i++){
+        if(pulse[i].used == 0){ //in use
+            pulse[i].x=ship_x + 3;
+            pulse[i].y=pulse[i].y -= pulse[i].speed;
 
-        if(pulse[0].y <= 0){
-            pulse[0].used=1;
-            pulse[0].y=max_y + ship_y;
-            //snprintf(pulse[0].body, sizeof pulse[0].body, "%i",ship_y);
+            if(pulse[i].y <= 1){ //hit stage
+                pulse[i].used=1;
+                pulse[i].y=max_y + ship_y;
+            }
+        }else{
+            pulse[i].x=ship_x + 3;
+            pulse[i].y=max_y + ship_y;
         }
-    }else{
-        pulse[0].x=ship_x + 3;
-        pulse[0].y=max_y + ship_y;
     }
 }
