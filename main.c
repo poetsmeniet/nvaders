@@ -21,6 +21,7 @@ struct p{
     int speed;
     char body[4];
     int used;
+    int dmg;
 };
 
 void setStage(struct f *ship, struct e *enemy, struct p *p, int max_x, int max_y);
@@ -53,9 +54,9 @@ int main(int argc, char *argv[]) {
     snprintf(enemy.body, sizeof enemy.body,"_______(%i)_______",0);
 
     struct p pulses[]={
-        {.x=0, .y=max_y, .speed=1, .used=1, .body=" | "},
-        {.x=0, .y=max_y, .speed=1, .used=1, .body="|||"},
-        {.x=0, .y=max_y, .speed=1, .used=1, .body="|^|"},
+        {.x=0, .y=max_y, .speed=1, .used=1, .dmg=1, .body=" | "},
+        {.x=0, .y=max_y, .speed=1, .used=1, .dmg=2, .body="|||"},
+        {.x=0, .y=max_y, .speed=1, .used=1, .dmg=3, .body="|^|"},
         {.x=-1}
     };
 
@@ -130,10 +131,10 @@ void printObjects(struct f * ship, struct e *enemy, struct p *pulse, int max_x, 
         mvprintw(pulse[i].y, pulse[i].x, pulse[i].body);
         // enemy hits
         if(pulse[i].y <= enemy->y && \
-        pulse[i].x >= (enemy->x - 8) && \
-        pulse[i].x <= (enemy->x + 8))
+        pulse[i].x >= (enemy->x) && \
+        pulse[i].x <= (enemy->x + 19))
         {
-            enemy->hits++;
+            enemy->hits+=pulse[i].dmg;
             snprintf(enemy->body, sizeof enemy->body,"_______(%i)______",enemy->hits);
             pulse[i].used=1;
             pulse[i].y=ship->y;
