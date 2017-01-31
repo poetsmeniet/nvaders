@@ -181,8 +181,8 @@ void moveProjectiles(struct p *pulse, struct e *enemy, int ship_x, int ship_y, i
         if(pulse[i].used == 0){ //in use
             pulse[i].x=ship_x + 3;
 
-            int newval=pulse[i].y - pulse[i].speed;
-            pulse[i].y=newval;
+            int newY=pulse[i].y - pulse[i].speed;
+            pulse[i].y=newY;
 
             if(pulse[i].y <= 1){ //hit stage
                 pulse[i].used=1;
