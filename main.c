@@ -135,10 +135,12 @@ void printObjects(struct f * ship, struct e *enemy, struct p *pulse, int max_y){
     }
 
     //detect game over, enemy collides with ship
-    if(enemy->y >= max_y-1 ||
-    ship->x >= enemy->x && ship->x <= enemy->x + 20 
-    && enemy->y >= (ship->y+max_y)-4 && enemy->y <= (ship->y+max_y) )
-    {
+    if((enemy->y >= max_y-1) ||
+       (ship->x >= enemy->x && 
+       ship->x <= enemy->x + 20 &&
+       enemy->y >= (ship->y+max_y)-4 && 
+       enemy->y <= (ship->y+max_y) )
+    ){
         snprintf(enemy->body, sizeof enemy->body,"GAME OVER. %i hits",enemy->hits);
         mvprintw(enemy->y, enemy->x, enemy->body);
         refresh();
