@@ -46,24 +46,22 @@ int main(int argc, char *argv[]) {
     //initialize structs, game objects
     struct f ship = {0, 0};
     struct e enemy = {0, 0, 0, "_______(0)_______"};
-    struct p pulses[]={
+    struct p p[]={
         {.x=0, .y=max_y, .speed=1, .used=1, .dmg=1, .body=" | "},
         {.x=0, .y=max_y, .speed=1, .used=1, .dmg=2, .body="|||"},
         {.x=0, .y=max_y, .speed=1, .used=1, .dmg=3, .body="|^|"},
         {.x=-1}
     };
 
-    struct p *pP=pulses;
-   
-    setStage(&ship, &enemy, pP, max_x, max_y);//move to on winch
+    setStage(&ship, &enemy, p, max_x, max_y);//move to on winch
    
     while(1) {
         getmaxyx(stdscr, max_y, max_x);
         mv=getch();
 
-        moveShip(&ship, pP, mv, max_x, max_y);
+        moveShip(&ship, p, mv, max_x, max_y);
 
-        moveProjectiles(pP, &enemy, ship.x, ship.y, max_y);
+        moveProjectiles(p, &enemy, ship.x, ship.y, max_y);
 
         if(enemy.x == (max_x - 18)){
             d=1;
@@ -76,7 +74,7 @@ int main(int argc, char *argv[]) {
 
         moveEnemy(&enemy, max_x, max_y, d);
 
-        printObjects(&ship, &enemy, pP, max_x, max_y);
+        printObjects(&ship, &enemy, p, max_x, max_y);
    
         usleep(DELAY2);
     }
