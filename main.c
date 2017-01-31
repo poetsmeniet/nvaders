@@ -26,12 +26,12 @@ struct p{
 
 void setStage(struct f *ship, struct e *enemy, struct p *p, int max_x, int max_y);
 void moveProjectiles(struct p *pulse, struct e *enemy, int ship_x, int ship_y, int max_y);
-void moveShip(struct f *ship, struct p *pulse, int mv, int max_x, int max_y);
-void moveEnemy(struct e *enemy, int max_x, int max_y, int d);
-void printObjects(struct f * ship, struct e *enemy, struct p *pulse, int max_x, int max_y);
+void moveShip(struct f *ship, struct p *pulse, int mv, int max_x);
+void moveEnemy(struct e *enemy, int d);
+void printObjects(struct f * ship, struct e *enemy, struct p *pulse, int max_y);
 void shoot(struct p *pulse);
 
-int main(int argc, char *argv[]) {
+int main(void) {
     initscr();
     noecho();
     keypad(stdscr, TRUE);
@@ -59,7 +59,7 @@ int main(int argc, char *argv[]) {
         getmaxyx(stdscr, max_y, max_x);
         mv=getch();
 
-        moveShip(&ship, p, mv, max_x, max_y);
+        moveShip(&ship, p, mv, max_x);
 
         moveProjectiles(p, &enemy, ship.x, ship.y, max_y);
 
@@ -72,9 +72,9 @@ int main(int argc, char *argv[]) {
             d=0;
         }
 
-        moveEnemy(&enemy, max_x, max_y, d);
+        moveEnemy(&enemy, d);
 
-        printObjects(&ship, &enemy, p, max_x, max_y);
+        printObjects(&ship, &enemy, p, max_y);
    
         usleep(DELAY2);
     }
@@ -82,7 +82,7 @@ int main(int argc, char *argv[]) {
     endwin();
 }
 
-void moveShip(struct f *ship, struct p *pulse, int mv, int max_x, int max_y){
+void moveShip(struct f *ship, struct p *pulse, int mv, int max_x){
         if(mv == KEY_LEFT && ship->x > 4){
             ship->x-=4;
         }else if(mv == KEY_RIGHT && ship->x < max_x - 14){
@@ -99,7 +99,7 @@ void moveShip(struct f *ship, struct p *pulse, int mv, int max_x, int max_y){
             ship->y+=4;
 }
 
-void moveEnemy(struct e *enemy, int max_x, int max_y, int d){
+void moveEnemy(struct e *enemy, int d){
     if(d)
         enemy->x--;
     else
@@ -107,7 +107,7 @@ void moveEnemy(struct e *enemy, int max_x, int max_y, int d){
     //sprintf(enemy->body,"*****(%d)",d);
 }
 
-void printObjects(struct f * ship, struct e *enemy, struct p *pulse, int max_x, int max_y){
+void printObjects(struct f * ship, struct e *enemy, struct p *pulse, int max_y){
     clear();
     mvprintw(enemy->y, enemy->x, enemy->body);
     
@@ -159,7 +159,7 @@ void setStage(struct f *ship, struct e *enemy, struct p *p, int max_x, int max_y
             ship->x--;
         else
             ship->x++;
-        printObjects(ship, enemy, p, max_x, max_y);
+        printObjects(ship, enemy, p, max_y);
 
         usleep(DELAY1);
     }
@@ -180,7 +180,9 @@ void moveProjectiles(struct p *pulse, struct e *enemy, int ship_x, int ship_y, i
     for(i=0;pulse[i].x!=-1;i++){
         if(pulse[i].used == 0){ //in use
             pulse[i].x=ship_x + 3;
-            pulse[i].y=pulse[i].y -= pulse[i].speed;
+
+            int newval=pulse[i].y - pulse[i].speed;
+            pulse[i].y=newval;
 
             if(pulse[i].y <= 1){ //hit stage
                 pulse[i].used=1;
